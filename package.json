@@ -12,6 +12,7 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "next": "16.0.10",
     "pg": "^8.16.3",
