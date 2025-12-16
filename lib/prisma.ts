@@ -1,7 +1,8 @@
 import { PrismaClient } from '@/app/generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { env } from 'prisma/config'
 
-const connectionString = process.env.DATBASE_URL;
+const connectionString = env('DATABASE_URL');
 
 if(!connectionString) throw new Error("DATABASE_URL is undefined");
 
