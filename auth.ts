@@ -1,11 +1,12 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { comparePassword, hashPassword } from "@/lib/auth";
 import crypto from "crypto";
+import type { User as PrismaUser } from "@/app/generated/prisma/client";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
     providers: [
         Credentials({
             name: "Credentials",
@@ -48,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.userId = user.id;
             }
             if (account?.provider === "google") {
-                const email = token.email ?? (user as any)?.email;
+                const email = token.email;
                 if (email) {
                     let dbUser = await prisma.user.findUnique({
                         where: { email },
@@ -72,9 +73,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async session({ session, token }) {
             
             if(session.user && token.userId){
-                (session.user as any).id = token.userId as string;
+                (session.user as PrismaUser).id = token.userId as string;
             }
             return session;
         },
     },
-});
+};

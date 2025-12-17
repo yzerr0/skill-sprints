@@ -2,42 +2,41 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
-export default function SignupPage() {
+export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         setError(null);
 
-        const res = await fetch("/api/auth/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
+        const res = await signIn("credentials", {
+            redirect: false,
+            email,
+            password,
         });
-        const data = await res.json();
-        if (!res.ok) {
-            setError(data.error || "Something went wrong.");
+        
+        if (res?.error) {
+            setError("Invalid email or password.");
+            return;
         } 
-        else {
-            router.push("/signin");
+        else{
+            router.push("/dashboard")
         }
-    }
-
+        
+    };
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 text-black">
             <form
                 onSubmit={handleSubmit}
                 className="bg-white p-6 rounded shadow-md w-full max-w-sm"
             >
-                <h2 className="text-2xl mb-4 text-center">Sign Up</h2>
+                <h2 className="text-2xl mb-4 text-center">Login</h2>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 <div className="mb-4">
                     <label className="block mb-1" htmlFor="email">Email</label>
@@ -64,11 +63,10 @@ export default function SignupPage() {
                 <button
                     type="submit"
                     className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-                    disabled={loading}
                 >
-                    {loading ? "Signing Up..." : "Sign Up"}
+                    Login
                 </button>
             </form>
         </div>
-    )
-} 
+    );
+}
