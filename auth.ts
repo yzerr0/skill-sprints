@@ -5,7 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { comparePassword, hashPassword } from "@/lib/auth";
 import crypto from "crypto";
 import type { User as PrismaUser } from "@/app/generated/prisma/client";
+import type { JWT } from "next-auth/jwt";
+import type { Session, User, Account } from "next-auth";
 
+// NextAuth configuration object exported for NextAuth handler
 export const authOptions: NextAuthOptions = {
     providers: [
         Credentials({
@@ -14,7 +17,7 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "text" },
                 password: { label: "Password", type: "password" },
             },
-            async authorize(credentials) {
+            async authorize(credentials: Record<"email" | "password", string> | undefined) {
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
@@ -44,7 +47,7 @@ export const authOptions: NextAuthOptions = {
     },
     secret: process.env.AUTH_SECRET,
     callbacks: {
-        async jwt({ token, user, account }) {
+        async jwt({ token, user, account }: { token: JWT; user: User | null; account: Account | null }) {
             if (user && account?.provider === "credentials"){
                 token.userId = user.id;
             }
@@ -70,10 +73,10 @@ export const authOptions: NextAuthOptions = {
             }
             return token;
         },
-        async session({ session, token }) {
-            
+        async session({ session, token }: { session: Session; token: JWT }) {
+
             if(session.user && token.userId){
-                (session.user as PrismaUser).id = token.userId as string;
+                (session.user as any).id = token.userId as string;
             }
             return session;
         },
